@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Shorts Studio</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#0b0f17;
+  --card:#111827;
+  --border:rgba(255,255,255,0.06);
+  --accent:#ff3b5c;
+  --accent2:#ff7a18;
+  --text:#e6edf6;
+  --muted:#6b7c93;
+  --green:#10b981;
+  --red:#ef4444;
+}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255,59,92,0.08), transparent 40%),
+    radial-gradient(circle at 90% 0%, rgba(34,211,238,0.06), transparent 40%),
+    var(--bg);
+  color:var(--text);
+}
+
+/* NAV */
+nav{
+  position:sticky; top:0;
+  display:flex; justify-content:space-between; align-items:center;
+  height:52px; padding:0 24px;
+  border-bottom:1px solid var(--border);
+  background:rgba(10,14,22,0.7);
+  backdrop-filter:blur(20px);
+}
+
+.logo{font-size:13px;font-weight:600}
+.tabs button{
+  background:none;border:none;color:var(--muted);
+  margin-left:14px;cursor:pointer;font-size:12px;
+}
+.tabs .active{color:var(--accent)}
+
+/* SECTIONS */
+.section{max-width:900px;margin:auto;padding:40px 20px}
+
+/* HERO */
+.hero h1{font-size:24px;margin-bottom:6px}
+.hero p{font-size:13px;color:var(--muted)}
+
+/* CARD */
+.card{
+  margin-top:20px;
+  padding:20px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  backdrop-filter:blur(10px);
+}
+
+/* INPUT */
+input{
+  width:100%;
+  padding:11px;
+  margin-bottom:12px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--text);
+}
+
+/* BUTTON */
+.primary{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;
+  cursor:pointer;
+}
+
+/* JOB LIST */
+.job{
+  padding:14px;
+  border-bottom:1px solid var(--border);
+}
+.job:last-child{border-bottom:none}
+
+.job-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:6px;
+}
+
+.job-title{font-size:12px}
+.job-meta{font-size:11px;color:var(--muted)}
+
+.badge{
+  font-size:10px;
+  padding:2px 8px;
+  border-radius:999px;
+}
+
+.running{background:#1f2937;color:#22c55e}
+.done{background:#1f2937;color:#10b981}
+.killed{background:#1f2937;color:#ef4444}
+.error{background:#1f2937;color:#f59e0b}
+
+/* KILL BUTTON */
+.kill-btn{
+  background:var(--red);
+  border:none;
+  color:#fff;
+  padding:4px 10px;
+  border-radius:6px;
+  font-size:11px;
+  cursor:pointer;
+}
+
+/* PROGRESS */
+.bar{
+  height:4px;
+  background:var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:6px;
+}
+.bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+
+/* VIDEO GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:16px;
+  margin-top:20px;
+}
+
+.video{
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--card);
+}
+
+video{
+  width:100%;
+  aspect-ratio:9/16;
+  background:black;
+}
+
+.meta{padding:10px;font-size:12px;color:var(--muted)}
+
+.download{
+  display:block;text-align:center;padding:6px;
+  border-top:1px solid var(--border);
+  color:var(--muted);text-decoration:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<nav>
+  <div class="logo">▶ Shorts Studio</div>
+  <div class="tabs">
+    <button id="tab-generate" class="active" onclick="showPage('generate')">Generate</button>
+    <button id="tab-videos" onclick="showPage('videos');loadVideos()">Library</button>
+  </div>
+</nav>
+
+<!-- GENERATE -->
+<div id="page-generate">
+
+  <div class="section hero">
+    <h1>Create Shorts</h1>
+    <p>Turn long videos into viral clips automatically</p>
+  </div>
+
+  <div class="section">
+    <div class="card">
+      <input id="url-input" placeholder="Paste YouTube URL"/>
+      <input id="count-input" type="number" value="3"/>
+      <button class="primary" onclick="startGeneration()">Generate Shorts</button>
+    </div>
+  </div>
+
+  <!-- JOBS -->
+  <div class="section">
+    <div class="card">
+      <h3 style="font-size:14px;margin-bottom:10px">Active Jobs</h3>
+      <div id="jobs-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- VIDEOS -->
+<div id="page-videos" style="display:none">
+  <div class="section">
+    <h1 style="font-size:20px">Your Shorts</h1>
+    <div class="grid" id="videos-grid"></div>
+  </div>
+</div>
+
+<script>
+
+/* NAV */
+function showPage(id){
+  document.getElementById('page-generate').style.display='none'
+  document.getElementById('page-videos').style.display='none'
+  document.getElementById('page-'+id).style.display='block'
+
+  document.getElementById('tab-generate').classList.remove('active')
+  document.getElementById('tab-videos').classList.remove('active')
+  document.getElementById('tab-'+id).classList.add('active')
+}
+
+/* GENERATE */
+function startGeneration(){
+  const url=document.getElementById('url-input').value
+  const count=document.getElementById('count-input').value
+
+  const form=new FormData()
+  form.append('url',url)
+  form.append('count',count)
+
+  fetch('/generate',{method:'POST',body:form})
+}
+
+/* LOAD JOBS */
+function loadJobs(){
+  fetch('/jobs')
+  .then(r=>r.json())
+  .then(jobs=>{
+    const list=document.getElementById('jobs-list')
+    list.innerHTML=''
+
+    if(!jobs.length){
+      list.innerHTML='<div class="job-meta">No jobs yet</div>'
+      return
+    }
+
+    jobs.forEach(j=>{
+      const el=document.createElement('div')
+      el.className='job'
+
+      const statusClass = j.status
+
+      el.innerHTML=`
+        <div class="job-top">
+          <div>
+            <div class="job-title">${j.stage.toUpperCase()} (${j.progress}%)</div>
+            <div class="job-meta">${j.created} ago</div>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="badge ${statusClass}">${j.status}</span>
+
+            ${
+              j.status === 'running'
+              ? `<button class="kill-btn" onclick="killJob('${j.job_id}')">Kill</button>`
+              : ''
+            }
+          </div>
+        </div>
+
+        <div class="bar">
+          <div class="bar-fill" style="width:${j.progress}%"></div>
+        </div>
+      `
+      list.appendChild(el)
+    })
+  })
+}
+
+/* AUTO REFRESH */
+setInterval(loadJobs,2000)
+loadJobs()
+
+/* KILL JOB */
+function killJob(id){
+  fetch('/kill/' + id, {method:'POST'})
+  .then(()=> loadJobs())
+}
+
+/* VIDEOS */
+function loadVideos(){
+  fetch('/videos')
+  .then(r=>r.json())
+  .then(videos=>{
+    const grid=document.getElementById('videos-grid')
+    grid.innerHTML=''
+
+    videos.forEach(v=>{
+      const el=document.createElement('div')
+      el.className='video'
+      el.innerHTML=`
+        <video controls>
+          <source src="/shorts/${v.name}">
+        </video>
+        <div class="meta">${v.name}</div>
+        <a class="download" href="/shorts/${v.name}" download>Download</a>
+      `
+      grid.appendChild(el)
+    })
+  })
+}
+
+</script>
+
+</body>
+</html>
