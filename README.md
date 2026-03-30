@@ -1,12 +1,17 @@
 📹 yt-shorts
 
-🚀 A lightweight web app to run and manage YouTube Shorts processing jobs with parallel execution and real-time tracking.
+    🚀 A lightweight web app to run and manage YouTube Shorts processing jobs with parallel execution and real-time tracking.
 
 ✨ Features
-🎬 Run Shorts processing jobs
-⚡ Parallel execution (multiprocessing)
-📊 Live job status tracking
-🛑 Kill running jobs from UI
+
+    🎬 Run Shorts processing jobs
+
+    ⚡ Parallel execution (multiprocessing)
+
+    📊 Live job status tracking
+
+    🛑 Kill running jobs from UI
+
 📁 Structure
 ```
 app.py                # Flask backend
@@ -26,13 +31,13 @@ pip install -r requirements.txt
 ▶️ Run
 ```
 python app.py
-
-🌐 http://localhost:5000
 ```
+🌐 http://localhost:5000
+
 
 ⚡ Flow
 UI → Flask → Multiprocessing → Pipeline → Status
-👨‍💻 Author
 
+👨‍💻 Author
 Abhay Kumar
 🔗 https://github.com/abhay31-dev
