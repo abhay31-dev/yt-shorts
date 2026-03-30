@@ -8,6 +8,3 @@
 !templates/
 !templates/**
 !requirements.txt
-
-# Allow gitignore itself
-!.gitignore
