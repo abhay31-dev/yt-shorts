@@ -1,324 +1,811 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Shorts Studio</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shorts Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07090f; --surface:#0d111c; --card:#111827; --border:#1c2535;
+      --accent:#e8354a; --accent2:#f97316; --cyan:#22d3ee;
+      --text:#dde4f0; --muted:#4b5e78; --green:#10b981;
+      --red:#ef4444; --warn:#f59e0b; --purple:#a78bfa;
+      --fh:'Syne',sans-serif; --fm:'IBM Plex Mono',monospace;
+    }
+    body{background:var(--bg);color:var(--text);font-family:var(--fm);min-height:100vh;overflow-x:hidden}
+    body::before{
+      content:'';position:fixed;inset:0;
+      background-image:linear-gradient(rgba(34,211,238,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,0.025) 1px,transparent 1px);
+      background-size:48px 48px;pointer-events:none;z-index:0;
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 20px;background:rgba(7,9,15,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+    .logo{font-family:var(--fh);font-size:1rem;font-weight:800;letter-spacing:-0.02em}
+    .logo span{color:var(--accent)}
+    .tabs{display:flex;gap:4px}
+    .tab{padding:4px 14px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--muted);font-family:var(--fm);font-size:0.7rem;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
+    .tab:hover{color:var(--text);border-color:var(--border)}
+    .tab.active{color:var(--cyan);border-color:rgba(34,211,238,0.25);background:rgba(34,211,238,0.06)}
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
+    /* PAGES */
+    .page{display:none;position:relative;z-index:1}
+    .page.active{display:block}
+    .wrap{max-width:640px;margin:0 auto;padding:0 20px}
+    .vwrap{max-width:1080px;margin:0 auto;padding:0 20px 60px}
 
-:root{
-  --bg:#0b0f17;
-  --card:#111827;
-  --border:rgba(255,255,255,0.06);
-  --accent:#ff3b5c;
-  --accent2:#ff7a18;
-  --text:#e6edf6;
-  --muted:#6b7c93;
-  --green:#10b981;
-  --red:#ef4444;
-}
+    /* PAGE HEADER */
+    .ph{padding:28px 0 20px;border-bottom:1px solid var(--border);margin-bottom:24px}
+    .ph-tag{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+    .ph-tag::before{content:'';width:16px;height:1px;background:var(--accent)}
+    h1{font-family:var(--fh);font-size:1.9rem;font-weight:800;letter-spacing:-0.03em;line-height:1.1;margin-bottom:5px}
+    h1 em{font-style:normal;color:var(--accent)}
+    .sub{font-size:0.78rem;color:var(--muted);line-height:1.6}
 
-body{
-  font-family:'Inter',sans-serif;
-  background:
-    radial-gradient(circle at 10% 20%, rgba(255,59,92,0.08), transparent 40%),
-    radial-gradient(circle at 90% 0%, rgba(34,211,238,0.06), transparent 40%),
-    var(--bg);
-  color:var(--text);
-}
+    /* FORM */
+    .field{margin-bottom:12px}
+    label{display:block;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+    input[type=text],input[type=number]{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--fm);font-size:0.83rem;outline:none;transition:border-color 0.15s,box-shadow 0.15s}
+    input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,0.07)}
+    input::placeholder{color:var(--muted);opacity:0.5}
+    .row{display:grid;grid-template-columns:1fr 130px;gap:10px;align-items:end}
 
-/* NAV */
-nav{
-  position:sticky; top:0;
-  display:flex; justify-content:space-between; align-items:center;
-  height:52px; padding:0 24px;
-  border-bottom:1px solid var(--border);
-  background:rgba(10,14,22,0.7);
-  backdrop-filter:blur(20px);
-}
+    .btn-primary{width:100%;padding:10px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-family:var(--fh);font-size:0.85rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;transition:background 0.15s,transform 0.1s,box-shadow 0.15s;margin-top:4px}
+    .btn-primary:hover:not(:disabled){background:#d42d40;box-shadow:0 4px 20px rgba(232,53,74,0.3);transform:translateY(-1px)}
+    .btn-primary:disabled{opacity:0.45;cursor:not-allowed;transform:none}
 
-.logo{font-size:13px;font-weight:600}
-.tabs button{
-  background:none;border:none;color:var(--muted);
-  margin-left:14px;cursor:pointer;font-size:12px;
-}
-.tabs .active{color:var(--accent)}
+    /* ACTIVE JOB */
+    #active-job{display:none;margin-bottom:24px}
+    .job-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .job-card::before{content:'';display:block;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--cyan),var(--accent));background-size:300% 100%;animation:shine 2s linear infinite}
+    @keyframes shine{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    .job-top{padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+    .job-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+    .job-stage{font-family:var(--fh);font-size:0.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .job-pct{font-size:0.72rem;color:var(--cyan);white-space:nowrap;flex-shrink:0}
+    .job-msg{font-size:0.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:10px}
+    .bar{background:var(--border);border-radius:99px;height:4px;overflow:hidden}
+    .bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width 0.5s cubic-bezier(0.4,0,0.2,1);width:0%}
+    .timing{display:flex;gap:20px;padding:10px 16px;border-bottom:1px solid var(--border)}
+    .t-item{display:flex;flex-direction:column;gap:2px}
+    .t-label{font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+    .t-val{font-size:0.78rem;color:var(--text);font-weight:500}
+    .steps{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px}
+    .step{display:flex;align-items:center;gap:5px;font-size:0.65rem;letter-spacing:0.05em;text-transform:uppercase;padding:3px 9px;border-radius:4px;border:1px solid var(--border);color:var(--muted);transition:all 0.2s}
+    .step-dot{width:5px;height:5px;border-radius:50%;background:var(--muted);transition:background 0.2s}
+    .step.active{border-color:var(--cyan);color:var(--cyan);background:rgba(34,211,238,0.06)}
+    .step.active .step-dot{background:var(--cyan);animation:blink 1s infinite}
+    .step.done{border-color:rgba(16,185,129,0.3);color:var(--green);background:rgba(16,185,129,0.05)}
+    .step.done .step-dot{background:var(--green)}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+    .kill-btn{background:var(--red);border:none;color:#fff;padding:4px 10px;border-radius:5px;font-family:var(--fm);font-size:0.65rem;cursor:pointer;flex-shrink:0;transition:opacity 0.15s}
+    .kill-btn:hover{opacity:0.8}
 
-/* SECTIONS */
-.section{max-width:900px;margin:auto;padding:40px 20px}
+    /* ALERTS */
+    .alert{display:none;border-radius:8px;padding:12px 14px;font-size:0.78rem;line-height:1.5;margin-top:12px;align-items:flex-start;gap:10px}
+    .alert.show{display:flex}
+    .alert-icon{flex-shrink:0;margin-top:1px}
+    .alert-body{flex:1;min-width:0}
+    .alert-body p{overflow-wrap:break-word;word-break:break-word}
+    .alert-success{background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);color:var(--green)}
+    .alert-error{background:rgba(232,53,74,0.07);border:1px solid rgba(232,53,74,0.2);color:var(--accent)}
+    .alert-action{flex-shrink:0;background:transparent;border:1px solid currentColor;color:inherit;padding:3px 10px;border-radius:4px;font-family:var(--fm);font-size:0.68rem;cursor:pointer;opacity:0.8;white-space:nowrap;transition:opacity 0.15s}
+    .alert-action:hover{opacity:1}
 
-/* HERO */
-.hero h1{font-size:24px;margin-bottom:6px}
-.hero p{font-size:13px;color:var(--muted)}
+    /* JOBS LIST */
+    .section-title{font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .jobs-list{margin-bottom:28px}
+    .jl-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px}
+    .jl-bar-wrap{flex:1;min-width:0}
+    .jl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+    .jl-url{font-size:0.7rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
+    .jl-meta{font-size:0.65rem;color:var(--muted);white-space:nowrap}
+    .jl-minibar{background:var(--border);border-radius:99px;height:3px;overflow:hidden}
+    .jl-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width 0.4s}
+    .badge{font-size:0.6rem;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0}
+    .badge-running{background:rgba(34,211,238,0.1);color:var(--cyan);border:1px solid rgba(34,211,238,0.2)}
+    .badge-done{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.2)}
+    .badge-error{background:rgba(245,158,11,0.1);color:var(--warn);border:1px solid rgba(245,158,11,0.2)}
+    .badge-killed{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
 
-/* CARD */
-.card{
-  margin-top:20px;
-  padding:20px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,0.03);
-  backdrop-filter:blur(10px);
-}
+    /* LIBRARY PAGE */
+    .vph{padding:24px 0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap;gap:10px}
+    h2{font-family:var(--fh);font-size:1.3rem;font-weight:800;letter-spacing:-0.02em}
+    h2 span{color:var(--accent)}
+    .btn-ghost{padding:4px 12px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--fm);font-size:0.68rem;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all 0.15s}
+    .btn-ghost:hover{color:var(--text);border-color:var(--cyan)}
+    .btn-upload-sel{padding:6px 16px;background:var(--purple);border:none;border-radius:5px;color:#fff;font-family:var(--fh);font-size:0.75rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;display:none}
+    .btn-upload-sel:hover{background:#9061f9;box-shadow:0 4px 16px rgba(167,139,250,0.3)}
+    .btn-upload-sel.show{display:block}
 
-/* INPUT */
-input{
-  width:100%;
-  padding:11px;
-  margin-bottom:12px;
-  border-radius:8px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,0.03);
-  color:var(--text);
-}
+    .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+    .vcard{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;animation:fadeUp 0.3s ease both;position:relative}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .vcard:hover{border-color:rgba(34,211,238,0.2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.3)}
+    .vcard.selected{border-color:var(--purple);box-shadow:0 0 0 2px rgba(167,139,250,0.3)}
+    .vcard video{width:100%;aspect-ratio:9/16;background:#000;display:block;max-height:340px;object-fit:cover}
+    .vmeta{padding:8px 10px;border-bottom:1px solid var(--border)}
+    .vname{font-size:0.7rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+    .vinfo{display:flex;justify-content:space-between;font-size:0.62rem;color:var(--muted)}
+    .vactions{display:flex;gap:6px;padding:8px 10px}
+    .vdl{flex:1;padding:5px 0;text-align:center;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);text-decoration:none;font-family:var(--fm);font-size:0.65rem;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
+    .vdl:hover{color:var(--accent2);border-color:var(--accent2)}
+    .vsel-btn{flex:1;padding:5px 0;text-align:center;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--fm);font-size:0.65rem;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
+    .vsel-btn:hover,.vcard.selected .vsel-btn{color:var(--purple);border-color:var(--purple)}
+    .vsel-check{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--purple);display:none;align-items:center;justify-content:center;font-size:0.6rem;color:#fff;font-weight:700}
+    .vcard.selected .vsel-check{display:flex}
 
-/* BUTTON */
-.primary{
-  width:100%;
-  padding:11px;
-  border:none;
-  border-radius:8px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  color:#fff;
-  cursor:pointer;
-}
+    .empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)}
+    .empty-icon{font-size:2rem;opacity:0.3;margin-bottom:10px}
+    .empty p{font-size:0.78rem;line-height:1.7}
 
-/* JOB LIST */
-.job{
-  padding:14px;
-  border-bottom:1px solid var(--border);
-}
-.job:last-child{border-bottom:none}
+    /* UPLOAD TAB */
+    .auth-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:20px}
+    .auth-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .channel-info{display:flex;flex-direction:column;gap:2px;flex:1}
+    .channel-name{font-family:var(--fh);font-size:1rem;font-weight:700}
+    .channel-sub{font-size:0.7rem;color:var(--muted)}
+    .btn-google{display:flex;align-items:center;gap:8px;padding:10px 18px;background:#fff;border:none;border-radius:6px;color:#333;font-family:var(--fm);font-size:0.8rem;font-weight:500;cursor:pointer;transition:box-shadow 0.15s}
+    .btn-google:hover{box-shadow:0 2px 12px rgba(255,255,255,0.2)}
+    .google-icon{width:16px;height:16px}
+    .btn-logout{padding:5px 14px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--fm);font-size:0.68rem;cursor:pointer;transition:all 0.15s;letter-spacing:0.06em;text-transform:uppercase}
+    .btn-logout:hover{border-color:var(--red);color:var(--red)}
+    .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .status-dot.online{background:var(--green)}
+    .status-dot.offline{background:var(--muted)}
 
-.job-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:6px;
-}
+    /* UPLOAD QUEUE */
+    .upload-queue{margin-top:20px}
+    .uq-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px}
+    .uq-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+    .uq-name{font-size:0.75rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+    .uq-pct{font-size:0.7rem;color:var(--cyan);flex-shrink:0}
+    .uq-bar{background:var(--border);border-radius:99px;height:3px;overflow:hidden;margin-bottom:6px}
+    .uq-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:99px;transition:width 0.4s}
+    .uq-link{font-size:0.7rem;color:var(--green);text-decoration:none;display:none}
+    .uq-link:hover{text-decoration:underline}
+    .uq-err{font-size:0.7rem;color:var(--accent);display:none;overflow-wrap:break-word;word-break:break-word}
 
-.job-title{font-size:12px}
-.job-meta{font-size:11px;color:var(--muted)}
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--card);border:1px solid var(--border);border-radius:12px;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:24px}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .modal-title{font-family:var(--fh);font-size:1.1rem;font-weight:700}
+    .modal-close{background:transparent;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px 8px;border-radius:4px;transition:color 0.15s}
+    .modal-close:hover{color:var(--text)}
+    .modal-video{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+    .modal-video:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+    .mv-filename{font-size:0.72rem;color:var(--muted);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mv-label{font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+    .title-options{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+    .title-option{padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:0.78rem;color:var(--muted);transition:all 0.15s;text-align:left}
+    .title-option:hover{border-color:var(--cyan);color:var(--text)}
+    .title-option.selected{border-color:var(--purple);color:var(--text);background:rgba(167,139,250,0.08)}
+    .title-custom{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:var(--fm);font-size:0.78rem;outline:none;margin-bottom:12px}
+    .title-custom:focus{border-color:var(--cyan)}
+    .tags-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:var(--fm);font-size:0.78rem;outline:none;margin-bottom:12px}
+    .tags-input:focus{border-color:var(--cyan)}
+    .privacy-row{display:flex;gap:8px;margin-bottom:0}
+    .privacy-opt{flex:1;padding:6px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--fm);font-size:0.65rem;cursor:pointer;transition:all 0.15s;letter-spacing:0.05em;text-transform:uppercase}
+    .privacy-opt:hover{border-color:var(--cyan);color:var(--text)}
+    .privacy-opt.selected{border-color:var(--purple);color:var(--purple);background:rgba(167,139,250,0.08)}
+    .modal-footer{display:flex;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+    .btn-confirm{flex:1;padding:10px;background:var(--purple);border:none;border-radius:6px;color:#fff;font-family:var(--fh);font-size:0.85rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
+    .btn-confirm:hover{background:#9061f9;box-shadow:0 4px 16px rgba(167,139,250,0.3)}
+    .btn-cancel{padding:10px 20px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:var(--fm);font-size:0.8rem;cursor:pointer;transition:all 0.15s}
+    .btn-cancel:hover{border-color:var(--text);color:var(--text)}
 
-.badge{
-  font-size:10px;
-  padding:2px 8px;
-  border-radius:999px;
-}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
 
-.running{background:#1f2937;color:#22c55e}
-.done{background:#1f2937;color:#10b981}
-.killed{background:#1f2937;color:#ef4444}
-.error{background:#1f2937;color:#f59e0b}
-
-/* KILL BUTTON */
-.kill-btn{
-  background:var(--red);
-  border:none;
-  color:#fff;
-  padding:4px 10px;
-  border-radius:6px;
-  font-size:11px;
-  cursor:pointer;
-}
-
-/* PROGRESS */
-.bar{
-  height:4px;
-  background:var(--border);
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:6px;
-}
-.bar-fill{
-  height:100%;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-}
-
-/* VIDEO GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:16px;
-  margin-top:20px;
-}
-
-.video{
-  border-radius:12px;
-  overflow:hidden;
-  background:var(--card);
-}
-
-video{
-  width:100%;
-  aspect-ratio:9/16;
-  background:black;
-}
-
-.meta{padding:10px;font-size:12px;color:var(--muted)}
-
-.download{
-  display:block;text-align:center;padding:6px;
-  border-top:1px solid var(--border);
-  color:var(--muted);text-decoration:none;
-}
-
-</style>
+    @media(max-width:520px){
+      h1{font-size:1.5rem}
+      .row{grid-template-columns:1fr}
+      .timing{gap:12px;flex-wrap:wrap}
+      .privacy-row{flex-wrap:wrap}
+    }
+  </style>
 </head>
-
 <body>
 
 <nav>
-  <div class="logo">▶ Shorts Studio</div>
+  <div class="logo">&#9654; Shorts<span>.</span>Studio</div>
   <div class="tabs">
-    <button id="tab-generate" class="active" onclick="showPage('generate')">Generate</button>
-    <button id="tab-videos" onclick="showPage('videos');loadVideos()">Library</button>
+    <button class="tab active" id="tab-generate" onclick="showPage('generate')">Generate</button>
+    <button class="tab" id="tab-videos" onclick="showPage('videos');loadVideos()">Library</button>
+    <button class="tab" id="tab-upload" onclick="showPage('upload');checkAuth()">Upload</button>
   </div>
 </nav>
 
-<!-- GENERATE -->
-<div id="page-generate">
+<!-- ══ GENERATE PAGE ══ -->
+<div class="page active" id="page-generate">
+  <div class="wrap">
+    <div class="ph">
+      <div class="ph-tag">Pipeline</div>
+      <h1>Create <em>Shorts</em></h1>
+      <p class="sub">Paste a YouTube URL and generate vertical clips automatically.</p>
+    </div>
+    <div class="field">
+      <label>YouTube URL</label>
+      <input type="text" id="url-input" placeholder="https://www.youtube.com/watch?v=..."/>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Number of Shorts</label>
+        <input type="number" id="count-input" value="3" min="1" max="10"/>
+      </div>
+      <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end">
+        <button class="btn-primary" id="gen-btn" onclick="startGeneration()">Generate</button>
+      </div>
+    </div>
 
-  <div class="section hero">
-    <h1>Create Shorts</h1>
-    <p>Turn long videos into viral clips automatically</p>
-  </div>
+    <div id="active-job">
+      <div class="job-card">
+        <div class="job-top">
+          <div class="job-row">
+            <div class="job-stage" id="j-stage">Starting...</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <span class="job-pct" id="j-pct">0%</span>
+              <button class="kill-btn" id="kill-btn" onclick="killActive()">Kill</button>
+            </div>
+          </div>
+          <div class="job-msg" id="j-msg">Preparing...</div>
+          <div class="bar"><div class="bar-fill" id="j-bar"></div></div>
+        </div>
+        <div class="timing">
+          <div class="t-item"><span class="t-label">Elapsed</span><span class="t-val" id="j-elapsed">—</span></div>
+          <div class="t-item"><span class="t-label">Est. Remaining</span><span class="t-val" id="j-eta">—</span></div>
+        </div>
+        <div class="steps">
+          <div class="step" id="step-download"><span class="step-dot"></span>Download</div>
+          <div class="step" id="step-transcribe"><span class="step-dot"></span>Transcribe</div>
+          <div class="step" id="step-analyze"><span class="step-dot"></span>Analyze</div>
+          <div class="step" id="step-render"><span class="step-dot"></span>Render</div>
+          <div class="step" id="step-concat"><span class="step-dot"></span>Concat</div>
+        </div>
+      </div>
+      <div class="alert alert-success" id="alert-ok">
+        <span class="alert-icon">✓</span>
+        <div class="alert-body"><p id="ok-msg">Done.</p></div>
+        <button class="alert-action" onclick="showPage('videos');loadVideos()">View →</button>
+      </div>
+      <div class="alert alert-error" id="alert-err">
+        <span class="alert-icon">✕</span>
+        <div class="alert-body"><p id="err-msg">An error occurred.</p></div>
+      </div>
+    </div>
 
-  <div class="section">
-    <div class="card">
-      <input id="url-input" placeholder="Paste YouTube URL"/>
-      <input id="count-input" type="number" value="3"/>
-      <button class="primary" onclick="startGeneration()">Generate Shorts</button>
+    <div class="jobs-list">
+      <div class="section-title">All Jobs</div>
+      <div id="jobs-list"><div style="font-size:0.72rem;color:var(--muted)">No jobs yet.</div></div>
     </div>
   </div>
-
-  <!-- JOBS -->
-  <div class="section">
-    <div class="card">
-      <h3 style="font-size:14px;margin-bottom:10px">Active Jobs</h3>
-      <div id="jobs-list"></div>
-    </div>
-  </div>
-
 </div>
 
-<!-- VIDEOS -->
-<div id="page-videos" style="display:none">
-  <div class="section">
-    <h1 style="font-size:20px">Your Shorts</h1>
-    <div class="grid" id="videos-grid"></div>
+<!-- ══ LIBRARY PAGE ══ -->
+<div class="page" id="page-videos">
+  <div class="vwrap">
+    <div class="vph">
+      <h2>My <span>Shorts</span></h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="sel-count" style="font-size:0.7rem;color:var(--muted)"></span>
+        <button class="btn-upload-sel" id="btn-upload-sel" onclick="openUploadModal()">Upload Selected</button>
+        <button class="btn-ghost" onclick="clearSelection()">Clear</button>
+        <button class="btn-ghost" onclick="loadVideos()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="vgrid" id="videos-grid">
+      <div class="empty"><div class="empty-icon">▷</div><p>No shorts yet.<br>Generate your first one.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ UPLOAD PAGE ══ -->
+<div class="page" id="page-upload">
+  <div class="wrap">
+    <div class="ph">
+      <div class="ph-tag">YouTube</div>
+      <h1>Upload <em>Shorts</em></h1>
+      <p class="sub">Sign in with Google to upload selected shorts to your YouTube channel.</p>
+    </div>
+
+    <!-- AUTH CARD -->
+    <div class="auth-card">
+      <div id="auth-loading" style="font-size:0.78rem;color:var(--muted)">Checking authentication...</div>
+      <div id="auth-loggedout" style="display:none">
+        <p style="font-size:0.78rem;color:var(--muted);margin-bottom:14px">Sign in with your Google account to authorise uploads to your YouTube channel. Your credentials are never stored on this server.</p>
+        <button class="btn-google" onclick="window.location.href='/auth/login'">
+          <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign in with Google
+        </button>
+      </div>
+      <div id="auth-loggedin" style="display:none">
+        <div class="auth-status">
+          <div class="status-dot online"></div>
+          <div class="channel-info">
+            <div class="channel-name" id="channel-name">—</div>
+            <div class="channel-sub">Connected · Uploads will go to this channel as Private</div>
+          </div>
+          <button class="btn-logout" onclick="logout()">Disconnect</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD QUEUE -->
+    <div id="upload-section" style="display:none">
+      <div class="section-title">Upload Queue</div>
+      <div class="upload-queue" id="upload-queue"></div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div id="upload-empty" style="display:none;text-align:center;padding:40px 0;color:var(--muted)">
+      <div style="font-size:2rem;opacity:0.3;margin-bottom:10px">☁</div>
+      <p style="font-size:0.78rem;line-height:1.7">No uploads yet.<br>Go to Library, select shorts, and click Upload Selected.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ CONFIRM MODAL ══ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Review & Confirm Upload</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmUpload()">Upload to YouTube</button>
+    </div>
   </div>
 </div>
 
 <script>
+// ── STATE ──
+let selectedVideos  = new Set();
+let preparedData    = [];   // [{filename, titles, tags, original_url}]
+let modalSelections = {};   // {filename: {title, tags, privacy}}
+let uploadEvtSource = null;
 
-/* NAV */
-function showPage(id){
-  document.getElementById('page-generate').style.display='none'
-  document.getElementById('page-videos').style.display='none'
-  document.getElementById('page-'+id).style.display='block'
-
-  document.getElementById('tab-generate').classList.remove('active')
-  document.getElementById('tab-videos').classList.remove('active')
-  document.getElementById('tab-'+id).classList.add('active')
+// ── NAV ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
 }
 
-/* GENERATE */
-function startGeneration(){
-  const url=document.getElementById('url-input').value
-  const count=document.getElementById('count-input').value
+// Handle auth redirect
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('auth') === 'success') {
+    history.replaceState({}, '', '/');
+    showPage('upload'); checkAuth();
+  } else if (p.get('auth') === 'error') {
+    history.replaceState({}, '', '/');
+    showPage('upload');
+    setTimeout(() => alert('Google sign-in failed: ' + (p.get('reason') || 'unknown error')), 300);
+  }
+})();
 
-  const form=new FormData()
-  form.append('url',url)
-  form.append('count',count)
+// ── STEPS ──
+const STEP_ORDER = ['download','transcribe','analyze','render','concat'];
+function markStep(stage) {
+  const cur = STEP_ORDER.indexOf(stage);
+  STEP_ORDER.forEach((s,i) => {
+    const el = document.getElementById('step-' + s);
+    if (!el) return;
+    el.className = 'step' + (i < cur ? ' done' : i === cur ? ' active' : '');
+  });
+}
+function allDone()   { STEP_ORDER.forEach(s => { const el = document.getElementById('step-'+s); if(el) el.className='step done'; }); }
+function resetSteps(){ STEP_ORDER.forEach(s => { const el = document.getElementById('step-'+s); if(el) el.className='step'; }); }
 
-  fetch('/generate',{method:'POST',body:form})
+// ── PROGRESS ──
+function setProgress(stage, msg, pct, elapsed, eta) {
+  const t = {download:'Downloading',transcribe:'Transcribing',analyze:'Analyzing',render:'Rendering',concat:'Joining',warn:'Warning',done_log:'Finishing'};
+  document.getElementById('j-stage').textContent = t[stage] || stage;
+  document.getElementById('j-msg').textContent   = msg;
+  if (pct != null) { document.getElementById('j-bar').style.width = pct+'%'; document.getElementById('j-pct').textContent = pct+'%'; }
+  if (elapsed) document.getElementById('j-elapsed').textContent = elapsed;
+  if (eta)     document.getElementById('j-eta').textContent     = eta;
 }
 
-/* LOAD JOBS */
-function loadJobs(){
-  fetch('/jobs')
-  .then(r=>r.json())
-  .then(jobs=>{
-    const list=document.getElementById('jobs-list')
-    list.innerHTML=''
+// ── GENERATION ──
+let evtSource = null, activeJobId = null;
 
-    if(!jobs.length){
-      list.innerHTML='<div class="job-meta">No jobs yet</div>'
-      return
+function startGeneration() {
+  const url = document.getElementById('url-input').value.trim();
+  const count = document.getElementById('count-input').value;
+  if (!url) { alert('Please enter a YouTube URL'); return; }
+  document.getElementById('active-job').style.display = 'block';
+  document.getElementById('alert-ok').classList.remove('show');
+  document.getElementById('alert-err').classList.remove('show');
+  document.getElementById('gen-btn').disabled = true;
+  document.getElementById('gen-btn').textContent = 'Processing...';
+  document.getElementById('j-bar').style.width = '0%';
+  document.getElementById('j-pct').textContent = '0%';
+  document.getElementById('j-elapsed').textContent = '—';
+  document.getElementById('j-eta').textContent = '—';
+  resetSteps();
+  setProgress('download','Preparing request...',2,null,null);
+  const form = new FormData();
+  form.append('url', url); form.append('count', count);
+  fetch('/generate',{method:'POST',body:form}).then(r=>r.json()).then(data => {
+    if (data.error) { showErr(data.error); return; }
+    activeJobId = data.job_id;
+    document.getElementById('kill-btn').style.display = 'block';
+    listenProgress(data.job_id); loadJobs();
+  }).catch(e => showErr(e.message));
+}
+
+function listenProgress(jobId) {
+  if (evtSource) evtSource.close();
+  evtSource = new EventSource('/progress/' + jobId);
+  evtSource.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    if (d.stage === 'ping') return;
+    if (d.stage === 'done') {
+      setProgress('done','All shorts are ready.',100,d.elapsed,'—');
+      allDone();
+      document.getElementById('kill-btn').style.display = 'none';
+      document.getElementById('j-eta').textContent = 'Done';
+      const n = d.outputs ? d.outputs.length : 0;
+      document.getElementById('ok-msg').textContent = `${n} short${n!==1?'s':''} generated in ${d.elapsed}.`;
+      document.getElementById('alert-ok').classList.add('show');
+      resetBtn(); loadJobs(); evtSource.close(); return;
     }
-
-    jobs.forEach(j=>{
-      const el=document.createElement('div')
-      el.className='job'
-
-      const statusClass = j.status
-
-      el.innerHTML=`
-        <div class="job-top">
-          <div>
-            <div class="job-title">${j.stage.toUpperCase()} (${j.progress}%)</div>
-            <div class="job-meta">${j.created} ago</div>
-          </div>
-
-          <div style="display:flex;gap:8px;align-items:center">
-            <span class="badge ${statusClass}">${j.status}</span>
-
-            ${
-              j.status === 'running'
-              ? `<button class="kill-btn" onclick="killJob('${j.job_id}')">Kill</button>`
-              : ''
-            }
-          </div>
-        </div>
-
-        <div class="bar">
-          <div class="bar-fill" style="width:${j.progress}%"></div>
-        </div>
-      `
-      list.appendChild(el)
-    })
-  })
+    if (d.stage === 'error') {
+      document.getElementById('j-eta').textContent = 'Stopped';
+      showErr(d.message); loadJobs(); evtSource.close(); return;
+    }
+    setProgress(d.stage, d.message||'', d.percent, d.elapsed, d.eta);
+    if (['download','transcribe','analyze','render','concat'].includes(d.stage)) markStep(d.stage);
+  };
+  evtSource.onerror = () => { showErr('Connection lost.'); evtSource.close(); resetBtn(); loadJobs(); };
 }
 
-/* AUTO REFRESH */
-setInterval(loadJobs,2000)
-loadJobs()
-
-/* KILL JOB */
-function killJob(id){
-  fetch('/kill/' + id, {method:'POST'})
-  .then(()=> loadJobs())
+function killActive() {
+  if (!activeJobId) return;
+  fetch('/kill/'+activeJobId,{method:'POST'}).then(() => {
+    document.getElementById('kill-btn').style.display = 'none';
+    showErr('Job killed by user.'); loadJobs();
+  });
 }
 
-/* VIDEOS */
-function loadVideos(){
-  fetch('/videos')
-  .then(r=>r.json())
-  .then(videos=>{
-    const grid=document.getElementById('videos-grid')
-    grid.innerHTML=''
+function showErr(msg) {
+  document.getElementById('err-msg').textContent = msg;
+  document.getElementById('alert-err').classList.add('show');
+  resetBtn();
+}
 
-    videos.forEach(v=>{
-      const el=document.createElement('div')
-      el.className='video'
-      el.innerHTML=`
-        <video controls>
-          <source src="/shorts/${v.name}">
+function resetBtn() {
+  const b = document.getElementById('gen-btn');
+  b.disabled = false; b.textContent = 'Generate';
+}
+
+// ── JOBS LIST ──
+function loadJobs() {
+  fetch('/jobs').then(r=>r.json()).then(jobs => {
+    const list = document.getElementById('jobs-list');
+    if (!jobs.length) { list.innerHTML='<div style="font-size:0.72rem;color:var(--muted)">No jobs yet.</div>'; return; }
+    list.innerHTML = '';
+    jobs.slice().reverse().forEach(j => {
+      const el = document.createElement('div');
+      el.className = 'jl-item';
+      const bc = {running:'badge-running',done:'badge-done',error:'badge-error',killed:'badge-killed'}[j.status]||'badge-running';
+      const urlShort = j.url.replace('https://','').replace('www.','');
+      el.innerHTML = `
+        <div class="jl-bar-wrap">
+          <div class="jl-top">
+            <div class="jl-url" title="${j.url}">${urlShort}</div>
+            <div class="jl-meta">${j.status==='running'?`Running ${j.elapsed}`:`Took ${j.elapsed}`} · ${j.count} short${j.count!==1?'s':''}</div>
+          </div>
+          <div class="jl-minibar"><div class="jl-fill" style="width:${j.progress}%"></div></div>
+        </div>
+        <span class="badge ${bc}">${j.status}</span>
+        ${j.status==='running'?`<button class="kill-btn" onclick="killJob('${j.job_id}')">Kill</button>`:''}`;
+      list.appendChild(el);
+    });
+  });
+}
+
+function killJob(id) { fetch('/kill/'+id,{method:'POST'}).then(()=>loadJobs()); }
+setInterval(loadJobs, 3000);
+loadJobs();
+
+// ── LIBRARY ──
+function loadVideos() {
+  const grid = document.getElementById('videos-grid');
+  grid.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  fetch('/videos').then(r=>r.json()).then(videos => {
+    if (!videos.length) {
+      grid.innerHTML = '<div class="empty"><div class="empty-icon">▷</div><p>No shorts yet.</p></div>';
+      return;
+    }
+    grid.innerHTML = '';
+    videos.forEach((v,i) => {
+      const card = document.createElement('div');
+      card.className = 'vcard' + (selectedVideos.has(v.name) ? ' selected' : '');
+      card.style.animationDelay = (i*0.05)+'s';
+      card.innerHTML = `
+        <div class="vsel-check">✓</div>
+        <video controls preload="metadata" playsinline>
+          <source src="/shorts/${v.name}" type="video/mp4">
         </video>
-        <div class="meta">${v.name}</div>
-        <a class="download" href="/shorts/${v.name}" download>Download</a>
-      `
-      grid.appendChild(el)
-    })
-  })
+        <div class="vmeta">
+          <div class="vname" title="${v.name}">${v.name}</div>
+          <div class="vinfo"><span>${v.size_mb} MB</span><span>${v.created}</span></div>
+        </div>
+        <div class="vactions">
+          <a class="vdl" href="/shorts/${v.name}" download="${v.name}">Download</a>
+          <button class="vsel-btn" onclick="toggleSelect('${v.name}', this.closest('.vcard'))">
+            ${selectedVideos.has(v.name) ? 'Deselect' : 'Select'}
+          </button>
+        </div>`;
+      grid.appendChild(card);
+    });
+    updateSelUI();
+  }).catch(() => {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">⚠</div><p>Failed to load.</p></div>';
+  });
 }
 
-</script>
+function toggleSelect(name, card) {
+  if (selectedVideos.has(name)) {
+    selectedVideos.delete(name);
+    card.classList.remove('selected');
+    card.querySelector('.vsel-btn').textContent = 'Select';
+  } else {
+    selectedVideos.add(name);
+    card.classList.add('selected');
+    card.querySelector('.vsel-btn').textContent = 'Deselect';
+  }
+  updateSelUI();
+}
 
+function updateSelUI() {
+  const n   = selectedVideos.size;
+  const btn = document.getElementById('btn-upload-sel');
+  const cnt = document.getElementById('sel-count');
+  cnt.textContent = n ? `${n} selected` : '';
+  n ? btn.classList.add('show') : btn.classList.remove('show');
+}
+
+function clearSelection() {
+  selectedVideos.clear();
+  document.querySelectorAll('.vcard.selected').forEach(c => {
+    c.classList.remove('selected');
+    const b = c.querySelector('.vsel-btn');
+    if (b) b.textContent = 'Select';
+  });
+  updateSelUI();
+}
+
+// ── UPLOAD MODAL ──
+function openUploadModal() {
+  if (!selectedVideos.size) return;
+  const filenames = [...selectedVideos];
+  fetch('/upload/prepare', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({filenames})
+  }).then(r=>r.json()).then(data => {
+    if (data.error) { alert(data.error); return; }
+    preparedData = data.videos;
+    renderModal(preparedData);
+    document.getElementById('modal-overlay').classList.add('open');
+  }).catch(e => alert('Failed to prepare upload: ' + e.message));
+}
+
+function renderModal(videos) {
+  modalSelections = {};
+  const body = document.getElementById('modal-body');
+  body.innerHTML = '';
+  videos.forEach(v => {
+    modalSelections[v.filename] = {
+      title:   v.titles[0],
+      tags:    v.tags.join(', '),
+      privacy: 'private',
+    };
+    const sec = document.createElement('div');
+    sec.className = 'modal-video';
+    sec.innerHTML = `
+      <div class="mv-filename">${v.filename}</div>
+      <span class="mv-label">Choose a title</span>
+      <div class="title-options">
+        ${v.titles.map((t,i) => `
+          <button class="title-option ${i===0?'selected':''}"
+            onclick="selectTitle('${v.filename}', this, '${t.replace(/'/g,"\\'")}')">
+            ${t}
+          </button>`).join('')}
+      </div>
+      <span class="mv-label">Custom title (optional — overrides selection)</span>
+      <input class="title-custom" placeholder="Type a custom title..."
+        oninput="modalSelections['${v.filename}'].title = this.value || modalSelections['${v.filename}'].title"
+        />
+      <span class="mv-label">Tags (comma separated)</span>
+      <input class="tags-input" value="${v.tags.join(', ')}"
+        oninput="modalSelections['${v.filename}'].tags = this.value"/>
+      <span class="mv-label">Privacy</span>
+      <div class="privacy-row">
+        ${['private','unlisted','public'].map(p => `
+          <div class="privacy-opt ${p==='private'?'selected':''}"
+            onclick="selectPrivacy('${v.filename}', this, '${p}')">
+            ${p}
+          </div>`).join('')}
+      </div>`;
+    body.appendChild(sec);
+  });
+}
+
+function selectTitle(filename, btn, title) {
+  btn.closest('.title-options').querySelectorAll('.title-option')
+    .forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  modalSelections[filename].title = title;
+  // Clear custom input
+  btn.closest('.modal-video').querySelector('.title-custom').value = '';
+}
+
+function selectPrivacy(filename, el, privacy) {
+  el.closest('.privacy-row').querySelectorAll('.privacy-opt')
+    .forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  modalSelections[filename].privacy = privacy;
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function confirmUpload() {
+  closeModal();
+
+  const videos = preparedData.map(v => ({
+    filename:     v.filename,
+    title:        modalSelections[v.filename].title,
+    tags:         modalSelections[v.filename].tags.split(',').map(t=>t.trim()).filter(Boolean),
+    privacy:      modalSelections[v.filename].privacy,
+    original_url: v.original_url,
+  }));
+
+  // Switch to upload tab and show queue
+  showPage('upload'); checkAuth();
+
+  fetch('/upload/submit', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({videos})
+  }).then(r=>r.json()).then(data => {
+    if (data.error) { alert('Upload error: ' + data.error); return; }
+    renderUploadQueue(videos);
+    listenUploadProgress(data.upload_job_id, videos);
+  }).catch(e => alert('Failed to start upload: ' + e.message));
+}
+
+function renderUploadQueue(videos) {
+  const section = document.getElementById('upload-section');
+  const queue   = document.getElementById('upload-queue');
+  document.getElementById('upload-empty').style.display = 'none';
+  section.style.display = 'block';
+  queue.innerHTML = '';
+  videos.forEach(v => {
+    const el = document.createElement('div');
+    el.className = 'uq-item';
+    el.id = 'uq-' + v.filename.replace(/[^a-z0-9]/gi,'_');
+    el.innerHTML = `
+      <div class="uq-top">
+        <div class="uq-name" title="${v.filename}">${v.title}</div>
+        <div class="uq-pct" id="uqpct-${el.id}">0%</div>
+      </div>
+      <div class="uq-bar"><div class="uq-fill" id="uqbar-${el.id}" style="width:0%"></div></div>
+      <div style="margin-top:6px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:0.65rem;color:var(--muted)" id="uqst-${el.id}">Waiting...</span>
+        <a class="uq-link" id="uqlink-${el.id}" target="_blank" href="#">View on YouTube ↗</a>
+        <span class="uq-err" id="uqerr-${el.id}"></span>
+      </div>`;
+    queue.appendChild(el);
+  });
+}
+
+// ── UPLOAD PROGRESS (pure polling — SSE not used for uploads) ──
+let uploadPollTimer = null;
+
+function pollUploadProgress(jobId, videos) {
+  if (uploadPollTimer) clearInterval(uploadPollTimer);
+
+  uploadPollTimer = setInterval(() => {
+    fetch('/upload/status/' + jobId)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.videos) return;
+
+        data.videos.forEach(v => {
+          const safeId = 'uq-' + v.filename.replace(/[^a-z0-9]/gi, '_');
+		  const pctEl  = document.getElementById('uqpct-' + safeId);
+		  const barEl  = document.getElementById('uqbar-' + safeId);
+		  const stEl   = document.getElementById('uqst-'  + safeId);
+		  const lnEl   = document.getElementById('uqlink-'+ safeId);
+		  const errEl  = document.getElementById('uqerr-' + safeId);
+
+          if (pctEl) pctEl.textContent = v.percent + '%';
+          if (barEl) barEl.style.width = v.percent + '%';
+
+          if (v.status === 'waiting')   { if (stEl) stEl.textContent = 'Waiting...'; }
+          if (v.status === 'uploading') { if (stEl) stEl.textContent = 'Uploading...'; }
+          if (v.status === 'done') {
+            if (stEl)  stEl.textContent = 'Done ✓';
+            if (barEl) barEl.style.background = 'var(--green)';
+            if (lnEl && v.youtube_url) { lnEl.href = v.youtube_url; lnEl.style.display = 'inline'; }
+          }
+          if (v.status === 'error') {
+            if (stEl)  stEl.textContent = 'Failed';
+            if (barEl) barEl.style.background = 'var(--red)';
+            if (errEl && v.error) { errEl.textContent = v.error; errEl.style.display = 'block'; }
+          }
+        });
+
+        // Stop polling when all done
+        if (data.status === 'done') {
+          clearInterval(uploadPollTimer);
+          uploadPollTimer = null;
+        }
+      })
+      .catch(() => {}); // silently ignore network errors
+  }, 1500); // poll every 1.5 seconds
+
+  // Safety: stop after 15 minutes
+  setTimeout(() => {
+    if (uploadPollTimer) { clearInterval(uploadPollTimer); uploadPollTimer = null; }
+  }, 900000);
+}
+
+function listenUploadProgress(jobId, videos) {
+  // Pure polling — no SSE for uploads (SSE gets buffered by Nginx on upload routes)
+  pollUploadProgress(jobId, videos);
+}
+
+// ── AUTH ──
+function checkAuth() {
+  const loading  = document.getElementById('auth-loading');
+  const loggedIn = document.getElementById('auth-loggedin');
+  const loggedOut= document.getElementById('auth-loggedout');
+  const empty    = document.getElementById('upload-empty');
+
+  loading.style.display  = 'block';
+  loggedIn.style.display = 'none';
+  loggedOut.style.display= 'none';
+
+  fetch('/auth/status').then(r=>r.json()).then(data => {
+    loading.style.display = 'none';
+    if (!data.configured) {
+      loggedOut.style.display = 'block';
+      loggedOut.innerHTML = `<p style="font-size:0.78rem;color:var(--warn)">⚠ OAuth not configured on server. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.</p>`;
+      return;
+    }
+    if (data.logged_in && data.channel) {
+      loggedIn.style.display = 'block';
+      document.getElementById('channel-name').textContent = data.channel.title;
+      // Show empty state if no uploads yet
+      if (!document.getElementById('upload-queue').children.length) {
+        empty.style.display = 'block';
+      }
+    } else {
+      loggedOut.style.display = 'block';
+    }
+  });
+}
+
+function logout() {
+  fetch('/auth/logout',{method:'POST'}).then(() => checkAuth());
+}
+</script>
 </body>
 </html>
